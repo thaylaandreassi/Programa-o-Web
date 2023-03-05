@@ -4,6 +4,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/usuario")
@@ -14,6 +16,11 @@ public class UsuarioController {
         this.user = new ArrayList<>();
     }
 
+    @GetMapping
+    public List<UsuarioTransfer>list(){
+        List<UsuarioTransfer> listaUser = user.stream().map(u -> new UsuarioTransfer(u)).collect(Collectors.toList());
+        return listaUser;
+    }
     @PostMapping
     public Usuario criar(@RequestBody Usuario novoUsuario){
         user.add(novoUsuario);
@@ -21,20 +28,15 @@ public class UsuarioController {
     }
 
     @PostMapping("/autenticacao/{usuario}/{senha}")
-    public Usuario autenticar(@PathVariable String usuario, @PathVariable String senha){
-        for(int i = 0; i < user.size(); i++){
-            if(user.get(i).getUsuario().equals(usuario) &&
-            user.get(i).getSenha().equals(senha)){
-                user.get(i).setAutenticacao(true);
-                return user.get(i);
+    public UsuarioTransfer autenticar(@PathVariable String usuario, @PathVariable String senha){
+        for (Usuario us : user){
+            if(us.getUsuario().equals(usuario) && us.getSenha().equals(senha)){
+                us.setAutenticacao(true);
+                var usuarioT = new UsuarioTransfer(us);
+                return usuarioT;
             }
         }
         return null;
-    }
-
-    @GetMapping
-    private List<Usuario>lista(){
-        return user;
     }
 
     @DeleteMapping("/autenticacao/{usuario}")
